@@ -1,0 +1,177 @@
+body {
+	margin: 0;
+	padding: 0;
+	font-size: 100%;
+	background-color: #fff;
+	overflow: hidden;
+}
+
+div, img {
+	user-select: none;
+	-webkit-user-select: none;
+	-webkit-user-drag: none;
+	-moz-user-select: none;
+	-moz-user-drag: none;
+}
+
+.content {
+	width: 240px;
+	height: auto;
+	margin: auto;
+	background-color: #fff;
+}
+
+.title-bar {
+	width: 100%;
+	height: 40px;
+	left: 0px;
+	top: 0px;
+	display: flex;
+	align-items: center;
+	text-align: center;
+	font-family: Segoe UI, Arial, sans-serif;
+	border-bottom: 1px solid #f6e6e6;
+}
+
+.title-bar span {
+	width: 100%;
+	font-size: 11.5px;
+	font-style: normal;
+	font-weight: normal;
+	color: #999;
+}
+
+.state {
+	font-family: Segoe UI, Arial, sans-serif;
+	font-size: 14px;
+	color: #666;
+	text-align: center;
+	padding: 26px;
+}
+
+.mid-container {
+	padding: 10px;
+	width: 180px;
+	height: 20px;
+	font-family: Segoe UI, Arial, sans-serif;
+	font-size: 13px;
+	color: #666;
+	margin: auto;
+	line-height: 20px;
+	cursor: pointer;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid #e4e4e4;
+}
+
+.enable-copy {
+	border-top: 1px solid #e4e4e4;
+}
+
+.mode-text {
+	margin: 0px;
+}
+
+.check-image {
+	width: auto;
+	height: 14px;
+	background-repeat: no-repeat;
+	user-select: none;
+	float: right;
+	margin: 0;
+	opacity: 0.8;
+}
+
+.description {
+	margin: 12px 0;
+	font-size: 12px;
+	display: grid;
+	align-items: center;
+	text-align: center;
+	height: 40px;
+	justify-content: center;
+}
+
+.reload {
+	display: none;
+	cursor: pointer;
+	opacity: 0.3;
+}
+
+.reload img {
+	width: auto;
+	height: 24px;
+	margin: auto;
+	transform: rotate(0deg);
+}
+
+.footer {
+	width: 240px;
+	height: 40px;
+	bottom: 0;
+	color: #545454;
+	background-color: #f1f3f4;
+	text-decoration: unset;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	border-radius: 0 0 2px 2px;
+	border-top: 1px solid #d8d8d8;
+}
+
+.version {
+	position: relative;
+	margin-left: 10px;
+	font-size: 14px;
+	text-decoration: none;
+	font-family: Segoe UI, Arial, sans-serif;
+}
+
+.settings {
+	width: 22px;
+	height: 22px;
+	margin-right: 10px;
+	vertical-align: middle;
+	opacity: 0.4;
+	background-image: url(../images/settings.png);
+	background-repeat: no-repeat;
+	background-size: 100%;
+	cursor: pointer;
+}
+
+.footer .browsers {
+	position: relative;
+	left: 125px;
+	top: 2px;
+}
+
+.browsers img {
+	height: 20px;
+	width: auto;
+	cursor: pointer;
+}
+
+.enable-copy:hover, .abs-mode:hover {
+	background: #ece9e3;
+}
+
+.enable-copy:active, .abs-mode:active {
+	background: #e4e1d9;
+}
+
+.reload:hover {
+	opacity: 0.6;
+}
+
+.reload:active {
+	opacity: 0.4;
+}
+
+.settings:hover {
+	opacity: 0.6;
+}
+
+.settings:active {
+	opacity: 0.5;
+}
