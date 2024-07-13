@@ -1,0 +1,5 @@
+node_modules/
+user_data/
+public/screenshots
+info.txt
+.env
