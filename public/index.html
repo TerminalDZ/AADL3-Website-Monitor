@@ -23,16 +23,16 @@
   <h1>Browser Control</h1>
   <button id="startBrowser" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#startBrowserModal">Start New Browser</button>
   <button id="stopAll" class="btn btn-danger mb-3">Stop All Browsers</button>
-  <button id="takeAllScreenshots" class="btn btn-secondary mb-3">Take All Screenshot</button>
+  <button id="takeAllScreenshots" class="btn btn-secondary mb-3">Take All Screenshots</button>
   <button id="dataCards" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#dataCardsModal">Data Cards</button>
   <div id="browsers" class="row"></div>
 
-  <!-- Modal -->
+  <!-- Start Browser Modal -->
   <div class="modal fade" id="startBrowserModal" tabindex="-1" aria-labelledby="startBrowserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="startBrowserModalLabel">Start New Browsers</h5>
+          <h5 class="modal-title" id="startBrowserModalLabel">Start New Browser</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
@@ -47,15 +47,16 @@
     </div>
   </div>
 
-  <!-- Modal -->
+  <!-- Data Cards Modal -->
   <div class="modal fade" id="dataCardsModal" tabindex="-1" aria-labelledby="dataCardsModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="dataCardsModalLabel">Data Cards <span id="CountData"></span><br> <button id="addData" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDataModal">Add Data</button></h5>
+          <h5 class="modal-title" id="dataCardsModalLabel">Data Cards <span id="CountData"></span></h5>
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDataModal">Add Data</button>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body row">
+        <div class="modal-body">
           <div id="cardsContainer" class="row"></div>
         </div>
         <div class="modal-footer">
@@ -65,6 +66,7 @@
     </div>
   </div>
 
+  <!-- Add Data Modal -->
   <div class="modal fade" id="addDataModal" tabindex="-1" aria-labelledby="addDataModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -72,7 +74,7 @@
           <h5 class="modal-title" id="addDataModalLabel">Add Data</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body row">
+        <div class="modal-body">
           <form>
             <div class="mb-3">
               <label for="NOM" class="form-label">NOM</label>
@@ -80,11 +82,11 @@
             </div>
             <div class="mb-3">
               <label for="WIL" class="form-label">WIL</label>
-              <input type="number" class="form-control" id="WIL" min="1" max="60">
+              <input type="number" class="form-control" id="WIL" min="1" max="58">
             </div>
             <div class="mb-3">
               <label for="NIN" class="form-label">NIN</label>
-              <input type="number" class="form-control" id="NIN" min="000000000000000000" max="999999999999999999">
+              <input type="number" class="form-control" id="NIN" min="100000000000000000" max="999999999999999999">
             </div>
             <div class="mb-3">
               <label for="NSS" class="form-label">NSS</label>
@@ -96,7 +98,6 @@
             </div>
           </form>
         </div>
-
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button type="button" class="btn btn-primary" id="confirmAddData">Add</button>
@@ -104,231 +105,5 @@
       </div>
     </div>
   </div>
-
-
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script>
-    const socket = io();
-
-    document.getElementById('confirmStartBrowser').addEventListener('click', () => {
-      const numBrowsers = document.getElementById('numBrowsers').value;
-      socket.emit('startBrowser', parseInt(numBrowsers, 10));
-      const startBrowserModal = bootstrap.Modal.getInstance(document.getElementById('startBrowserModal'));
-      startBrowserModal.hide();
-    });
-
-    document.getElementById('stopAll').addEventListener('click', () => {
-      socket.emit('stopAll');
-    });
-
-    socket.on('browserStarted', (browserId) => {
-      const browserDiv = document.createElement('div');
-      browserDiv.className = 'col-md-4 browser-card';
-      browserDiv.id = `browser-${browserId}`;
-      browserDiv.innerHTML = `
-        <div class="card">
-          <img src="./test.png" class="card-img-top" alt="Browser ${browserId}" style="height: 200px;" id="screenshot-${browserId}">
-          <div class="card-body">
-            <h5 class="card-title">Browser ${browserId}</h5>
-            <p class="card-text" id="messages-${browserId}"></p>
-            <button class="btn btn-danger mt-3" onclick="stopBrowser(${browserId})">Stop</button>
-            <button class="btn btn-secondary mt-3" onclick="takeScreenshot(${browserId})">Screenshot</button>
-            <button class="btn btn-primary mt-3" onclick="OperationAgain(${browserId})">Reload</button>
-            <button class="btn btn-primary mt-3" onclick="OpenBrowser(${browserId})">Open Browser</button>
-          </div>
-        </div>`;
-      document.getElementById('browsers').appendChild(browserDiv);
-    });
-
-    socket.on('browserRestarted', (browserId) => {
-      const browserDiv = document.getElementById(`browser-${browserId}`);
-      
-    });
-
-    function OperationAgain(browserId) {
-      socket.emit('OperationAgain', browserId);
-    }
-
-    function OpenBrowser(browserId) {
-      socket.emit('openBrowser', browserId);
-    }
-
-    socket.on('OperationAgainResult', ({ browserId, message, type }) => {
-      if (message.includes('Error: Navigating frame was detached')) {
-        socket.emit('stopBrowser', browserId);
-      } else {
-          if (currentMessageDivs[browserId]) {
-            currentMessageDivs[browserId].className = `alert alert-${type}`;
-            currentMessageDivs[browserId].innerHTML = message;
-          } else {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `alert alert-${type}`;
-            messageDiv.innerHTML = message;
-            document.getElementById(`messages-${browserId}`).appendChild(messageDiv);
-            currentMessageDivs[browserId] = messageDiv;
-          }
-      
-          setTimeout(() => {
-            if (currentMessageDivs[browserId].className !== 'alert alert-success') {
-              currentMessageDivs[browserId].remove();
-              delete currentMessageDivs[browserId];
-            }
-          }, 5000);
-      }
-  });
-
-    socket.on('allBrowsersStopped', () => {
-      document.getElementById('browsers').innerHTML = '';
-    });
-
-    let currentMessageDivs = {};
-
-    socket.on('browserMessage', ({ browserId, message, type }) => {
-        if (message.includes('Error: Navigating frame was detached')) {
-          socket.emit('stopBrowser', browserId);
-        } else {
-            if (currentMessageDivs[browserId]) {
-              currentMessageDivs[browserId].className = `alert alert-${type}`;
-              currentMessageDivs[browserId].innerHTML = message;
-            } else {
-              const messageDiv = document.createElement('div');
-              messageDiv.className = `alert alert-${type}`;
-              messageDiv.innerHTML = message;
-              document.getElementById(`messages-${browserId}`).appendChild(messageDiv);
-              currentMessageDivs[browserId] = messageDiv;
-            }
-        
-            setTimeout(() => {
-              if (currentMessageDivs[browserId].className !== 'alert alert-success') {
-                currentMessageDivs[browserId].remove();
-                delete currentMessageDivs[browserId];
-              }
-            }, 5000);
-        }
-    });
-
-    socket.on('screenshotTaken', ({ browserId, screenshotPath }) => {
-      console.log('screenshotTaken', browserId, screenshotPath);
-      const img = document.querySelector(`#screenshot-${browserId}`);
-      img.src = `${screenshotPath}?timestamp=${new Date().getTime()}`;
-      
-
-
-      
-    });
-
-    document.getElementById('takeAllScreenshots').addEventListener('click', () => {
-      socket.emit('takeAllScreenshots');
-    });
-
-    function stopBrowser(browserId) {
-      socket.emit('stopBrowser', browserId);
-    }
-
-    function takeScreenshot(browserId) {
-      socket.emit('takeScreenshot', browserId);
-    }
-
-    window.addEventListener('load', () => {
-      socket.emit('restoreBrowsers');
-    });
-
-
-    document.getElementById('dataCards').addEventListener('click', () => {
-      socket.emit('getDataInfo');
-    });
-
-    socket.on('getDataInfoResult', (data) => {
-      const cardsContainer = document.getElementById('cardsContainer');
-      cardsContainer.innerHTML = ''; 
-    
-      data.forEach(item => {
-
-        const CountData = document.getElementById('CountData');
-        CountData.innerText = `(${data.length})`;
-
-
-
-        const card = document.createElement('div');
-        card.className = 'card col-md-5 m-1'; 
-      
-        const cardBody = document.createElement('div');
-        cardBody.className = 'card-body';
-      
-        const cardTitle = document.createElement('h5');
-        cardTitle.className = 'card-title';
-        cardTitle.innerHTML = item.NOM + ' ' + '<button class="btn btn-danger" onclick="deletDataFromFile(\'' + item.NIN + '\')">Delete</button>';
-      
-        const cardText = document.createElement('p');
-        cardText.className = 'card-text';
-        cardText.innerHTML = `
-          <strong>WIL:</strong> ${item.WIL}<br>
-          <strong>NIN:</strong> ${item.NIN}<span class="copy-btn" onclick="copyToClipboard('${item.NIN}')" style="cursor: pointer;">📋</span> <br>
-          <strong>NSS:</strong> ${item.NSS}<span class="copy-btn" onclick="copyToClipboard('${item.NSS}')" style="cursor: pointer;">📋</span> <br>
-          <strong>TEL:</strong> ${item.TEL}<span class="copy-btn" onclick="copyToClipboard('${item.TEL}')" style="cursor: pointer;">📋</span> <br>
-        `;
-      
-        cardBody.appendChild(cardTitle);
-        cardBody.appendChild(cardText);
-        card.appendChild(cardBody);
-        cardsContainer.appendChild(card);
-      });
-    });
-
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text);
-
-      const copyBtns = document.querySelectorAll('.copy-btn');
-      copyBtns.forEach(btn => {
-        btn.innerText = '📋';
-      });
-
-      const btn = event.target;
-
-      btn.innerText = '✔️';
-
-      setTimeout(() => {
-        btn.innerText = '📋';
-      }, 2000);
-
-    }
-
-    document.getElementById('confirmAddData').addEventListener('click', () => {
-      const NOM = document.getElementById('NOM').value;
-      const WIL = document.getElementById('WIL').value;
-      const NIN = document.getElementById('NIN').value;
-      const NSS = document.getElementById('NSS').value;
-      const TEL = document.getElementById('TEL').value;
-
-      const data = {
-        NOM,
-        WIL,
-        NIN,
-        NSS,
-        TEL
-      };
-      
-
-      socket.emit('addDataToFile', data);
-
-      const addDataModal = bootstrap.Modal.getInstance(document.getElementById('addDataModal'));
-      addDataModal.hide();
-    });
-
-
-    function deletDataFromFile(NIN) {
-      console.log(NIN);
-      socket.emit('deletDataFromFile', NIN);
-
-    }
-
-
-
-
-
-
-
-  </script>
 </body>
 </html>
