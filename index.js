@@ -53,22 +53,19 @@ async function takeAllScreenshots(browser, socket) {
 async function getDataInfo() {
   try {
     const data = await fs.readFile('info.txt', 'utf8');
-
     const records = data.split('......................');
 
-    let jsonData = records.map(record => {
+    const jsonData = records.map(record => {
       const lines = record.trim().split('\n');
-
       const entry = {};
+
       lines.forEach(line => {
         const [key, value] = line.split(':').map(item => item.trim());
         entry[key] = value;
       });
 
       return entry;
-    });
-
-    jsonData = jsonData.filter(entry => Object.keys(entry).length > 0);
+    }).filter(entry => Object.keys(entry).length > 0);
 
     return jsonData;
   } catch (error) {
@@ -93,10 +90,9 @@ async function addDataToFile(NOM, WIL, NIN, NSS, TEL) {
   }
 }
 
-async function deletDataFromFile(NIN) {
+async function deleteDataFromFile(NIN) {
   try {
     let data = await fs.readFile('info.txt', 'utf8');
-
     const regex = new RegExp(`\\n......................\\n\\s*NOM:.*?\\n\\s*WIL:.*?\\n\\s*NIN: ${NIN}.*?\\n\\s*NSS:.*?\\n\\s*TEL:.*?(?=\\n......................|$)`, 'gs');
 
     data = data.replace(regex, '');
@@ -159,134 +155,50 @@ async function startBrowser(socket) {
   const userDataDir = path.join(__dirname, `user_data/browser_${browserId}`);
   const browser = await puppeteer.launch({
     headless: false,
+    userDataDir,
     args: [
-      `--disable-extensions-except=${extensionPath}`,
-      `--load-extension=${extensionPath}`
-    ],
-    userDataDir
+      `--load-extension=${extensionPath}`,
+      `--disable-extensions-except=${extensionPath}`
+    ]
   });
   browser._browserId = browserId;
   browsers.push(browser);
-  socket.emit('browserStarted', browserId);
+
+  socket.emit('browserStarted', { browserId });
 
   const page = await browser.newPage();
-  checkPage(browser, socket, page);
+  page.on('dialog', async dialog => {
+    console.log(`Dialog message: ${dialog.message()}`);
+    await dialog.dismiss();
+  });
+
+  await checkPage(browser, socket, page);
 }
 
-async function stopBrowser(browserId) {
-  const browser = browsers.find(b => b._browserId === browserId);
-  if (browser) {
-    await browser.close();
-    browsers.splice(browsers.indexOf(browser), 1);
-  }
-}
-
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-io.on('connection', (socket) => {
-  console.log('Client connected');
-
-  socket.on('startBrowser', async (numBrowsers) => {
-    for (let i = 0; i < numBrowsers; i++) {
+function setupSocketIo(server) {
+  const io = socketIo(server);
+  io.on('connection', socket => {
+    console.log('A user connected');
+    socket.on('startBrowser', async () => {
       await startBrowser(socket);
-    }
-  });
-
-  socket.on('stopAll', async () => {
-    stopRefreshing = true;
-    for (const browser of browsers) {
-      await browser.close();
-    }
-    browsers.length = 0;
-    socket.emit('allBrowsersStopped');
-  });
-
-  socket.on('stopBrowser', async (browserId) => {
-    await stopBrowser(browserId);
-  
-
-
-    socket.emit('browserStopped', browserId);
-  });
-
-  socket.on('openBrowser', async (browserId) => {
-    const browser = browsers.find(b => b._browserId === browserId);
-    if (browser) {
-      const pages = await browser.pages();
-      const lastPage = pages[pages.length - 1];
-      await lastPage.bringToFront();
-    }
-  });
-
-  socket.on('takeScreenshot', async (browserId) => {
-    const browser = browsers.find(b => b._browserId === browserId);
-    if (browser) {
-      const pages = await browser.pages();
-      const lastPage = pages[pages.length - 1];
-      const screenshotPath = await takeScreenshot(lastPage, browserId);
-      socket.emit('screenshotTaken', { browserId, screenshotPath });
-      console.log(`Screenshot taken for browser ${browserId} - ${screenshotPath}`);
-    }
-  });
-
-  socket.on('OperationAgain', async (browserId) => {
-    const browser = browsers.find(b => b._browserId === browserId);
-    if (browser) {
-      const page = await browser.newPage();
-      checkPage(browser, socket, page);
-
-      socket.emit('OperationAgainResult', { browserId });
-    }
-  });
-
-  socket.on('takeAllScreenshots', async () => {
-    for (const browser of browsers) {
-      await takeAllScreenshots(browser, socket);
-    }
-  });
-
-  socket.on('restoreBrowsers', () => {
-    browsers.forEach(browser => {
-      socket.emit('browserStarted', browser._browserId);
+    });
+    socket.on('stopRefreshing', () => {
+      stopRefreshing = true;
+      console.log('Stopping the refreshing process');
     });
   });
+}
 
-  socket.on('getDataInfo', async () => {
-    const data = await getDataInfo();
-    socket.emit('getDataInfoResult', data);
+function startServer() {
+  const app = express();
+  const server = http.createServer(app);
+  setupSocketIo(server);
+
+  app.use(express.static(path.join(__dirname, 'public')));
+
+  server.listen(3000, () => {
+    console.log('Server listening on port 3000');
   });
+}
 
-  socket.on('addDataToFile', async (data) => {
-    const { NOM, WIL, NIN, NSS, TEL } = data;
-
-    if (!NOM || !WIL || !NIN || !NSS || !TEL) {
-      console.error('Missing data fields');
-      return;
-    }
-
-    await addDataToFile(NOM, WIL, NIN, NSS, TEL);
-    socket.emit('getDataInfoResult', await getDataInfo());
-  });
-
-  socket.on('deletDataFromFile', async (data) => {
-    const { NIN } = data;
-    await deletDataFromFile(NIN);
-    socket.emit('getDataInfoResult', await getDataInfo());
-  });
-
-  socket.on('disconnect', () => {
-    console.log('Client disconnected');
-  
-
-
-  });
-});
-
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+startServer();
