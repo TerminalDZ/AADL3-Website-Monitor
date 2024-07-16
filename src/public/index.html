@@ -20,14 +20,18 @@
   </style>
 </head>
 <body>
-  <h1>Browser Control</h1>
-  <button id="startBrowser" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#startBrowserModal">Start New Browser</button>
-  <button id="stopAll" class="btn btn-danger mb-3">Stop All Browsers</button>
-  <button id="takeAllScreenshots" class="btn btn-secondary mb-3">Take All Screenshot</button>
-  <button id="dataCards" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#dataCardsModal">Data Cards</button>
-  <div id="browsers" class="row"></div>
+  <div class="container">
+    <h1 class="mb-4">Browser Control</h1>
+    <div class="d-flex flex-wrap mb-4">
+      <button id="startBrowser" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#startBrowserModal">Start New Browser</button>
+      <button id="stopAll" class="btn btn-danger me-2">Stop All Browsers</button>
+      <button id="takeAllScreenshots" class="btn btn-secondary me-2">Take All Screenshot</button>
+      <button id="dataCards" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#dataCardsModal">Data Cards</button>
+    </div>
+    <div id="browsers" class="row"></div>
+  </div>
 
-  <!-- Modal -->
+  <!-- Start Browser Modal -->
   <div class="modal fade" id="startBrowserModal" tabindex="-1" aria-labelledby="startBrowserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -47,12 +51,13 @@
     </div>
   </div>
 
-  <!-- Modal -->
+  <!-- Data Cards Modal -->
   <div class="modal fade" id="dataCardsModal" tabindex="-1" aria-labelledby="dataCardsModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="dataCardsModalLabel">Data Cards <span id="CountData"></span><br> <button id="addData" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDataModal">Add Data</button></h5>
+          <h5 class="modal-title" id="dataCardsModalLabel">Data Cards <span id="CountData"></span></h5>
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDataModal">Add Data</button>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body row">
@@ -65,8 +70,8 @@
     </div>
   </div>
 
-  <!-- Modal -->
-  <div id="dataModalSelect" class="modal fade" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
+  <!-- Data Select Modal -->
+  <div class="modal fade" id="dataModalSelect" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
@@ -79,8 +84,8 @@
       </div>
     </div>
   </div>
-  
 
+  <!-- Add Data Modal -->
   <div class="modal fade" id="addDataModal" tabindex="-1" aria-labelledby="addDataModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -112,7 +117,6 @@
             </div>
           </form>
         </div>
-
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
           <button type="button" class="btn btn-primary" id="confirmAddData">Add</button>
@@ -121,13 +125,11 @@
     </div>
   </div>
 
-
-
-
-
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
+    let currentMessageDivs = {};
+    let selectedBrowserId;
 
     document.getElementById('confirmStartBrowser').addEventListener('click', () => {
       const numBrowsers = document.getElementById('numBrowsers').value;
@@ -159,109 +161,62 @@
       document.getElementById('browsers').appendChild(browserDiv);
     });
 
-    socket.on('browserRestarted', (browserId) => {
-      const browserDiv = document.getElementById(`browser-${browserId}`);
-      
-    });
-
-    function OperationAgain(browserId) {
-      socket.emit('OperationAgain', browserId);
-    }
-
-    function AutoFill(browserId) {
-      socket.emit('AutoFill', browserId);
-    }
-
-
-
     socket.on('OperationAgainResult', ({ browserId, message, type }) => {
-      if (message.includes('Error: Navigating frame was detached')) {
-        socket.emit('stopBrowser', browserId);
-      } else {
-          if (currentMessageDivs[browserId]) {
-            currentMessageDivs[browserId].className = `alert alert-${type}`;
-            currentMessageDivs[browserId].innerHTML = message;
-          } else {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `alert alert-${type}`;
-            messageDiv.innerHTML = message;
-            document.getElementById(`messages-${browserId}`).appendChild(messageDiv);
-            currentMessageDivs[browserId] = messageDiv;
-          }
-      
-          setTimeout(() => {
-            if (currentMessageDivs[browserId].className !== 'alert alert-success') {
-              currentMessageDivs[browserId].remove();
-              delete currentMessageDivs[browserId];
-            }
-          }, 5000);
-      }
-  });
+      displayMessage(browserId, message, type);
+    });
 
     socket.on('allBrowsersStopped', () => {
       document.getElementById('browsers').innerHTML = '';
     });
 
-    let currentMessageDivs = {};
-
     socket.on('browserMessage', ({ browserId, message, type }) => {
-        const autoFillButton = document.querySelector(`#autoFill-${browserId}`);
-
-        if (message.includes('Error: Navigating frame was detached')) {
-            socket.emit('stopBrowser', browserId);
-        } else {
-            if (currentMessageDivs[browserId]) {
-                currentMessageDivs[browserId].className = `alert alert-${type}`;
-                currentMessageDivs[browserId].innerHTML = message;
-            } else {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `alert alert-${type}`;
-                messageDiv.innerHTML = message;
-                document.getElementById(`messages-${browserId}`).appendChild(messageDiv);
-                currentMessageDivs[browserId] = messageDiv;
-            }
-          
-            if (message.includes('Status: 200 - Stopped refreshing')) {
-                // Display the Auto Fill button
-                if (!autoFillButton) {
-                    const button = document.createElement('button');
-                    button.className = 'btn btn-primary mt-3';
-                    button.id = `autoFill-${browserId}`;
-                    button.innerHTML = 'Auto Fill';
-                    button.onclick = () => AutoFill(browserId);
-                    document.getElementById(`browser-${browserId}`).appendChild(button);
-                } else {
-                    autoFillButton.style.display = 'block';
-                }
-            } else {
-                // Hide the Auto Fill button
-                if (autoFillButton) {
-                    autoFillButton.style.display = 'none';
-                }
-            }
-          
-            setTimeout(() => {
-                if (currentMessageDivs[browserId].className !== 'alert alert-success') {
-                    currentMessageDivs[browserId].remove();
-                    delete currentMessageDivs[browserId];
-                }
-            }, 5000);
+      const autoFillButton = document.querySelector(`#autoFill-${browserId}`);
+      displayMessage(browserId, message, type);
+      
+      if (message.includes('Status: 200 - Stopped refreshing')) {
+        if (autoFillButton) {
+          autoFillButton.style.display = 'block';
         }
+      } else {
+        if (autoFillButton) {
+          autoFillButton.style.display = 'none';
+        }
+      }
     });
 
-
     socket.on('screenshotTaken', ({ browserId, screenshotPath }) => {
-      console.log('screenshotTaken', browserId, screenshotPath);
       const img = document.querySelector(`#screenshot-${browserId}`);
       img.src = `${screenshotPath}?timestamp=${new Date().getTime()}`;
-      
-
-
-      
     });
 
     document.getElementById('takeAllScreenshots').addEventListener('click', () => {
       socket.emit('takeAllScreenshots');
+    });
+
+    document.getElementById('dataCards').addEventListener('click', () => {
+      socket.emit('getDataInfo');
+    });
+
+    socket.on('getDataInfoResult', (data) => {
+      displayDataCards(data);
+    });
+
+    socket.on('dataSelected', (data) => {
+      socket.emit('AutoFill', selectedBrowserId, data);
+    });
+
+    document.getElementById('confirmAddData').addEventListener('click', () => {
+      const NOM = document.getElementById('NOM').value;
+      const WIL = document.getElementById('WIL').value;
+      const NIN = document.getElementById('NIN').value;
+      const NSS = document.getElementById('NSS').value;
+      const TEL = document.getElementById('TEL').value;
+
+      const data = { NOM, WIL, NIN, NSS, TEL };
+      socket.emit('addDataToFile', data);
+
+      const addDataModal = bootstrap.Modal.getInstance(document.getElementById('addDataModal'));
+      addDataModal.hide();
     });
 
     function stopBrowser(browserId) {
@@ -272,53 +227,80 @@
       socket.emit('takeScreenshot', browserId);
     }
 
-    window.addEventListener('load', () => {
-      socket.emit('restoreBrowsers');
-    });
+    function OperationAgain(browserId) {
+      socket.emit('OperationAgain', browserId);
+    }
 
+    function AutoFill(browserId) {
+      socket.on('getDataInfoResult', (data) => {
+        displayDataList(data);
+      });
 
-    document.getElementById('dataCards').addEventListener('click', () => {
       socket.emit('getDataInfo');
-    });
+      selectedBrowserId = browserId;
+    }
 
-    socket.on('getDataInfoResult', (data) => {
+    function selectData(index) {
+      socket.emit('dataSelected', index);
+      const dataModal = bootstrap.Modal.getInstance(document.getElementById('dataModalSelect'));
+      dataModal.hide();
+    }
+
+    function displayMessage(browserId, message, type) {
+      if (currentMessageDivs[browserId]) {
+        currentMessageDivs[browserId].className = `alert alert-${type}`;
+        currentMessageDivs[browserId].innerHTML = message;
+      } else {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `alert alert-${type}`;
+        messageDiv.innerHTML = message;
+        document.getElementById(`messages-${browserId}`).appendChild(messageDiv);
+        currentMessageDivs[browserId] = messageDiv;
+      }
+
+      setTimeout(() => {
+        if (currentMessageDivs[browserId].className !== 'alert alert-success') {
+          currentMessageDivs[browserId].remove();
+          delete currentMessageDivs[browserId];
+        }
+      }, 5000);
+    }
+
+    function displayDataCards(data) {
       const cardsContainer = document.getElementById('cardsContainer');
-      cardsContainer.innerHTML = ''; 
-    
+      cardsContainer.innerHTML = '';
+
       data.forEach(item => {
-
-        const CountData = document.getElementById('CountData');
-        CountData.innerText = `(${data.length})`;
-
-
-
         const card = document.createElement('div');
-        card.className = 'card col-md-5 m-1'; 
-      
+        card.className = 'card col-md-5 m-1';
+
         const cardBody = document.createElement('div');
         cardBody.className = 'card-body';
-      
+
         const cardTitle = document.createElement('h5');
         cardTitle.className = 'card-title';
-        cardTitle.innerHTML = item.NOM + ' ' + '<button class="btn btn-danger" onclick="deletDataFromFile(\'' + item.NIN + '\')">Delete</button>';
-      
+        cardTitle.innerHTML = `${item.NOM} <button class="btn btn-danger" onclick="deletDataFromFile('${item.NIN}')">Delete</button>`;
+
         const cardText = document.createElement('p');
         cardText.className = 'card-text';
         cardText.innerHTML = `
           <strong>WIL:</strong> ${item.WIL}<br>
-          <strong>NIN:</strong> ${item.NIN}<span class="copy-btn" onclick="copyToClipboard('${item.NIN}')" style="cursor: pointer;">📋</span> <br>
-          <strong>NSS:</strong> ${item.NSS}<span class="copy-btn" onclick="copyToClipboard('${item.NSS}')" style="cursor: pointer;">📋</span> <br>
-          <strong>TEL:</strong> ${item.TEL}<span class="copy-btn" onclick="copyToClipboard('${item.TEL}')" style="cursor: pointer;">📋</span> <br>
+          <strong>NIN:</strong> ${item.NIN}<span class="copy-btn" onclick="copyToClipboard('${item.NIN}')" style="cursor: pointer;">📋</span><br>
+          <strong>NSS:</strong> ${item.NSS}<span class="copy-btn" onclick="copyToClipboard('${item.NSS}')" style="cursor: pointer;">📋</span><br>
+          <strong>TEL:</strong> ${item.TEL}<span class="copy-btn" onclick="copyToClipboard('${item.TEL}')" style="cursor: pointer;">📋</span><br>
         `;
-      
+
         cardBody.appendChild(cardTitle);
         cardBody.appendChild(cardText);
         card.appendChild(cardBody);
         cardsContainer.appendChild(card);
       });
-    });
 
-    socket.on('getDataInfoResult', (data) => {
+      const countData = document.getElementById('CountData');
+      countData.innerText = `(${data.length})`;
+    }
+
+    function displayDataList(data) {
       const dataList = document.getElementById('dataList');
       dataList.innerHTML = '';
 
@@ -327,36 +309,18 @@
         listItem.className = 'list-group-item';
         listItem.innerHTML = `
           <strong>${item.NOM}</strong> - ${item.WIL} - ${item.NIN} - ${item.NSS} - ${item.TEL}
-          <button class="btn btn-primary float-end" onclick="selectData(${index})">Select</button>
+          <button class="btn btn-primary float-end" onclick="selectData(${index})" data-bs-dismiss="modal">Select</button>
         `;
         dataList.appendChild(listItem);
       });
-    
+
       const dataModal = new bootstrap.Modal(document.getElementById('dataModalSelect'));
       dataModal.show();
-    });
-
-    function selectData(index) {
-      socket.emit('dataSelected', index);
-      const dataModal = bootstrap.Modal.getInstance(document.getElementById('dataModalSelect'));
-      dataModal.hide();
     }
 
-    function AutoFill(browserId) {
-      socket.emit('getDataInfo');
-      selectedBrowserId = browserId;
+    function deletDataFromFile(NIN) {
+      socket.emit('deletDataFromFile', NIN);
     }
-
-    socket.on('dataSelected', (data) => {
-      console.log('Data selected for autofill:', data);
-      socket.emit('AutoFill', selectedBrowserId, data);
-    });
-
-    let selectedBrowserId;
-
-
-
-
 
     function copyToClipboard(text) {
       navigator.clipboard.writeText(text);
@@ -367,50 +331,12 @@
       });
 
       const btn = event.target;
-
       btn.innerText = '✔️';
 
       setTimeout(() => {
         btn.innerText = '📋';
       }, 2000);
-
     }
-
-    document.getElementById('confirmAddData').addEventListener('click', () => {
-      const NOM = document.getElementById('NOM').value;
-      const WIL = document.getElementById('WIL').value;
-      const NIN = document.getElementById('NIN').value;
-      const NSS = document.getElementById('NSS').value;
-      const TEL = document.getElementById('TEL').value;
-
-      const data = {
-        NOM,
-        WIL,
-        NIN,
-        NSS,
-        TEL
-      };
-      
-
-      socket.emit('addDataToFile', data);
-
-      const addDataModal = bootstrap.Modal.getInstance(document.getElementById('addDataModal'));
-      addDataModal.hide();
-    });
-
-
-    function deletDataFromFile(NIN) {
-      console.log(NIN);
-      socket.emit('deletDataFromFile', NIN);
-
-    }
-
-
-
-
-
-
-
   </script>
 </body>
 </html>
