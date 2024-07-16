@@ -64,6 +64,13 @@
 1. اضغط على زر "Data Cards" لعرض السجلات.
 2. لإضافة سجل جديد، اضغط على زر "Add Data" وأدخل البيانات.
 
+### الملء التلقائي للنماذج (Auto Fill)
+1.اضغط على زر "Auto Fill" بجانب المتصفح المطلوب.
+2.اختر البيانات التي تريد ملء النموذج بها من القائمة التي ستظهر.
+3.سيتم ملء النموذج تلقائيًا وإرسال البيانات.
+
+
+
 ### استعادة المتصفحات
 يتم استعادة المتصفحات عند إعادة تحميل الصفحة تلقائيًا.
 
@@ -180,6 +187,11 @@ Click the "Take All Screenshot" button.
 ### Manage Data
 1. Click the "Data Cards" button to view records.
 2. To add a new record, click the "Add Data" button and enter the information.
+
+### Auto Fill Forms
+1. Click the "Auto Fill" button next to the desired browser.
+2. Select the data you want to fill the form with from the dropdown that appears.
+3. The form will be filled automatically and the data will be submitted.
 
 ### Restore Browsers
 Browsers are restored automatically upon page reload.
