@@ -34,7 +34,7 @@
 
 3. **تشغيل التطبيق**:
     ```bash
-    node index.js
+    npm start
     ```
 
 4. **الوصول إلى الواجهة**:
@@ -44,8 +44,9 @@
     ```
 
 ## ملفات المشروع
-- **index.js**: الكود الرئيسي لتشغيل التطبيق.
+- **src/** : الكود الرئيسي لتشغيل التطبيق.
 - **public/**: الملفات الثابتة التي تخدم الواجهة الأمامية.
+-**.env**: ملف تكوين البيئة لتحديد متغيرات البيئة.
 - **info.txt**: ملف البيانات لإدارة السجلات.
 
 ## كيفية الاستخدام
@@ -92,7 +93,7 @@
 4. ابحث في الاستجابة (response) عن `chat` وستجد `id`. هذا هو `CHAT_ID`.
 
 ## ملاحظات
-- تأكد من ضبط متغيرات `TELEGRAM_TOKEN` و `CHAT_ID` بقيم صحيحة في الكود.
+- تأكد من ضبط متغيرات `TELEGRAM_TOKEN` و `CHAT_ID` بقيم صحيحة في الكود .env الخاص بك.
 
 ## دعم
 إذا واجهت أي مشاكل، يرجى فتح تذكرة في مستودع GitHub.
@@ -168,9 +169,11 @@ This project aims to build a system to monitor and interact with the AADL3 websi
     ```
 
 ## Project Files
-- **index.js**: The main code to run the application.
-- **public/**: Static files serving the frontend.
+- **src/**: Main code to run the application.
+- **public/**: Static files serving the frontend interface.
+- **.env**: Environment configuration file to set environment variables.
 - **info.txt**: Data file for managing records.
+
 
 ## Usage
 ### Start a New Browser
@@ -214,7 +217,7 @@ Browsers are restored automatically upon page reload.
 4. Look in the response for `chat` and find the `id`. This is your `CHAT_ID`.
 
 ## Notes
-- Ensure that `TELEGRAM_TOKEN` and `CHAT_ID` variables are set correctly in the code.
+- Ensure that `TELEGRAM_TOKEN` and `CHAT_ID` variables are set correctly in the code in your .env file.
 
 ## Support
 If you encounter any issues, please open a ticket in the GitHub repository.
