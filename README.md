@@ -159,7 +159,7 @@ This project aims to build a system to monitor and interact with the AADL3 websi
 
 3. **Run the application**:
     ```bash
-    node index.js
+    npm start
     ```
 
 4. **Access the interface**:
