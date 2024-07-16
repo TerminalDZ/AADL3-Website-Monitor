@@ -2,14 +2,15 @@
   "name": "AADL3 Website Monitor",
   "version": "1.0.0",
   "description": "مشروع Website Monitor & Data Manager هو أداة مراقبة مواقع الويب وإدارة البيانات باستخدام Puppeteer و Express و Socket.io.",
-  "main": "index.js",
+  "main": "server.js",
   "author": "idriss boukmouche",
   "scripts": {
-    "start": "node index.js",
-    "nodemon": "nodemon index.js"
+    "start": "node src/server.js",
+    "nodemon": "nodemon src/server.js"
   },
   "dependencies": {
     "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "form-data": "^4.0.0",
     "node-fetch": "^3.3.2",
