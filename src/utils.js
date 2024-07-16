@@ -13,7 +13,8 @@ async function sendTelegramMessage(message, TELEGRAM_TOKEN, CHAT_ID) {
             text: message
         });
     } catch (error) {
-        console.error('Failed to send message to Telegram:', error);
+      //  console.error('Failed to send message to Telegram:', error);
+      console.error('Failed to send message to Telegram');
     }
 }
 
@@ -23,7 +24,8 @@ async function takeScreenshot(page, browserId) {
         await page.screenshot({ path: screenshotPath });
         return `/screenshots/browser-${browserId}.png`;
     } catch (error) {
-        console.error(`Failed to take screenshot for browser ${browserId}:`, error);
+        //console.error(`Failed to take screenshot for browser ${browserId}:`, error);
+        console.error(`Failed to take screenshot for browser ${browserId}:`);
         return null;
     }
 }

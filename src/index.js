@@ -37,7 +37,8 @@ async function takeScreenshot(page, browserId) {
     await page.screenshot({ path: screenshotPath });
     return `/screenshots/browser-${browserId}.png`;
   } catch (error) {
-    console.error(`Failed to take screenshot for browser ${browserId}:`, error);
+    //console.error(`Failed to take screenshot for browser ${browserId}:`, error);
+    console.error(`Failed to take screenshot for browser ${browserId}:`);
     return null;
   }
 }
@@ -75,7 +76,8 @@ async function getDataInfo() {
 
     return jsonData;
   } catch (error) {
-    console.error('Error reading from file', error);
+   // console.error('Error reading from file', error);
+    console.error('Error reading from file');
     return [];
   }
 }
@@ -92,7 +94,8 @@ async function addDataToFile(NOM, WIL, NIN, NSS, TEL) {
 
     await fs.writeFile('info.txt', data, 'utf8');
   } catch (error) {
-    console.error('Error writing to file', error);
+   // console.error('Error writing to file', error);
+    console.error('Error writing to file');
   }
 }
 
@@ -107,7 +110,8 @@ async function deletDataFromFile(NIN) {
     await fs.writeFile('info.txt', data, 'utf8');
     console.log(`Data with NIN: ${NIN} has been deleted.`);
   } catch (error) {
-    console.error('Error writing to file', error);
+   // console.error('Error writing to file', error);
+    console.error('Error writing to file');
   }
 }
 
@@ -143,7 +147,8 @@ async function checkPage(browser, socket, page) {
       }
     }
   } catch (error) {
-    console.error('Error checking page:', error);
+   // console.error('Error checking page:', error);
+    console.error('Error checking page');
     socket.emit('browserMessage', { browserId: browser._browserId, message: `Error: ${error.message}`, type: 'danger' });
 
     const screenshotPath = await takeScreenshot(page, browser._browserId);

@@ -23,7 +23,8 @@ async function getDataInfo() {
 
         return jsonData;
     } catch (error) {
-        console.error('Error reading from file', error);
+       // console.error('Error reading from file', error);
+        console.error('Error reading from file');
         return [];
     }
 }
@@ -40,7 +41,8 @@ async function addDataToFile(NOM, WIL, NIN, NSS, TEL) {
 
         await fs.writeFile('info.txt', data, 'utf8');
     } catch (error) {
-        console.error('Error writing to file', error);
+       // console.error('Error writing to file', error);
+        console.error('Error writing to file');
     }
 }
 
@@ -55,7 +57,8 @@ async function deletDataFromFile(NIN) {
         await fs.writeFile('info.txt', data, 'utf8');
         console.log(`Data with NIN: ${NIN} has been deleted.`);
     } catch (error) {
-        console.error('Error writing to file', error);
+        //console.error('Error writing to file', error);
+        console.error('Error writing to file');
     }
 }
 
