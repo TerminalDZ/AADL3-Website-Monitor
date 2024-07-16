@@ -153,7 +153,7 @@
             <button class="btn btn-danger mt-3" onclick="stopBrowser(${browserId})">Stop</button>
             <button class="btn btn-secondary mt-3" onclick="takeScreenshot(${browserId})">Screenshot</button>
             <button class="btn btn-primary mt-3" onclick="OperationAgain(${browserId})">Reload</button>
-            <button class="btn btn-primary mt-3" onclick="AutoFill(${browserId})">Auto Fill</button>
+            <button class="btn btn-primary mt-3" id="autoFill-${browserId}" style="display: none;" onclick="AutoFill(${browserId})">Auto Fill</button>
           </div>
         </div>`;
       document.getElementById('browsers').appendChild(browserDiv);
@@ -205,28 +205,50 @@
     let currentMessageDivs = {};
 
     socket.on('browserMessage', ({ browserId, message, type }) => {
+        const autoFillButton = document.querySelector(`#autoFill-${browserId}`);
+
         if (message.includes('Error: Navigating frame was detached')) {
-          socket.emit('stopBrowser', browserId);
+            socket.emit('stopBrowser', browserId);
         } else {
             if (currentMessageDivs[browserId]) {
-              currentMessageDivs[browserId].className = `alert alert-${type}`;
-              currentMessageDivs[browserId].innerHTML = message;
+                currentMessageDivs[browserId].className = `alert alert-${type}`;
+                currentMessageDivs[browserId].innerHTML = message;
             } else {
-              const messageDiv = document.createElement('div');
-              messageDiv.className = `alert alert-${type}`;
-              messageDiv.innerHTML = message;
-              document.getElementById(`messages-${browserId}`).appendChild(messageDiv);
-              currentMessageDivs[browserId] = messageDiv;
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `alert alert-${type}`;
+                messageDiv.innerHTML = message;
+                document.getElementById(`messages-${browserId}`).appendChild(messageDiv);
+                currentMessageDivs[browserId] = messageDiv;
             }
-        
+          
+            if (message.includes('Status: 200 - Stopped refreshing')) {
+                // Display the Auto Fill button
+                if (!autoFillButton) {
+                    const button = document.createElement('button');
+                    button.className = 'btn btn-primary mt-3';
+                    button.id = `autoFill-${browserId}`;
+                    button.innerHTML = 'Auto Fill';
+                    button.onclick = () => AutoFill(browserId);
+                    document.getElementById(`browser-${browserId}`).appendChild(button);
+                } else {
+                    autoFillButton.style.display = 'block';
+                }
+            } else {
+                // Hide the Auto Fill button
+                if (autoFillButton) {
+                    autoFillButton.style.display = 'none';
+                }
+            }
+          
             setTimeout(() => {
-              if (currentMessageDivs[browserId].className !== 'alert alert-success') {
-                currentMessageDivs[browserId].remove();
-                delete currentMessageDivs[browserId];
-              }
+                if (currentMessageDivs[browserId].className !== 'alert alert-success') {
+                    currentMessageDivs[browserId].remove();
+                    delete currentMessageDivs[browserId];
+                }
             }, 5000);
         }
     });
+
 
     socket.on('screenshotTaken', ({ browserId, screenshotPath }) => {
       console.log('screenshotTaken', browserId, screenshotPath);

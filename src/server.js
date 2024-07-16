@@ -3,7 +3,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
 const dotenv = require('dotenv');
-const { startBrowser, stopBrowser, takeAllScreenshots, checkPage } = require('./puppeteerManager');
+const { startBrowser, stopBrowser, takeAllScreenshots, checkPage, takeScreenshot  } = require('./puppeteerManager');
 const { getDataInfo, addDataToFile, deletDataFromFile } = require('./fileManager');
 
 dotenv.config();

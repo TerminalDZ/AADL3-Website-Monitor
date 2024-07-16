@@ -102,5 +102,6 @@ module.exports = {
     startBrowser,
     stopBrowser,
     checkPage,
-    takeAllScreenshots
+    takeAllScreenshots,
+    takeScreenshot 
 };
