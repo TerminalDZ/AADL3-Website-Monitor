@@ -199,10 +199,26 @@
 
     socket.on('getDataInfoResult', (data) => {
       displayDataCards(data);
+
+
     });
+
+    socket.on('dataSelectedResult', (data) => {
+      displayDataList(data);
+
+    });
+
 
     socket.on('dataSelected', (data) => {
       socket.emit('AutoFill', selectedBrowserId, data);
+    });
+
+    socket.on('browserStopped', (browserId) => {
+     
+      const browserDiv = document.getElementById(`browser-${browserId}`);
+      browserDiv.remove();
+      
+
     });
 
     document.getElementById('confirmAddData').addEventListener('click', () => {
@@ -232,11 +248,10 @@
     }
 
     function AutoFill(browserId) {
-      socket.on('getDataInfoResult', (data) => {
-        displayDataList(data);
-      });
 
-      socket.emit('getDataInfo');
+ 
+
+      socket.emit('getDataInfoSelect');
       selectedBrowserId = browserId;
     }
 

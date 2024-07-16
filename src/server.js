@@ -34,6 +34,9 @@ io.on('connection', (socket) => {
         browsers.length = 0;
         socket.emit('allBrowsersStopped');
     });
+ 
+
+
 
     socket.on('stopBrowser', async (browserId) => {
         await stopBrowser(browserId, browsers);
@@ -78,10 +81,17 @@ io.on('connection', (socket) => {
         socket.emit('getDataInfoResult', data);
     });
 
+    socket.on('getDataInfoSelect', async () => {
+        const data = await getDataInfo();
+        socket.emit('dataSelectedResult', data);
+    });
+
     socket.on('dataSelected', async (index) => {
         const data = await getDataInfo();
         socket.emit('dataSelected', data[index]);
     });
+    
+    
 
     socket.on('AutoFill', async (browserId, data) => {
       const browser = browsers.find(b => b._browserId === browserId);
