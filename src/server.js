@@ -46,30 +46,30 @@ io.on('connection', (socket) => {
             const pages = await browser.pages();
             const lastPage = pages[pages.length - 1];
             const screenshotPath = await takeScreenshot(lastPage, browserId);
-            socket.emit('screenshotTaken', { browserId, screenshotPath });
-            console.log(`Screenshot taken for browser ${browserId} - ${screenshotPath}`);
+            if (screenshotPath) {
+                socket.emit('screenshotTaken', { browserId, screenshotPath });
+                console.log(`Screenshot taken for browser ${browserId} - ${screenshotPath}`);
+            } else {
+                console.error(`Failed to take screenshot for browser ${browserId}`);
+            }
         }
     });
 
     socket.on('OperationAgain', async (browserId) => {
         const browser = browsers.find(b => b._browserId === browserId);
         if (browser) {
-            // Delete all cookies, local storage, and session storage data
             const pages = await browser.pages();
             const lastPage = pages[pages.length - 1];
             await lastPage.evaluate(() => {
                 window.localStorage.clear();
                 window.sessionStorage.clear();
                 document.cookie.split(";").forEach(function (c) {
-                    document.cookie = c
-                        .replace(/^ +/, "")
-                        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                    document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
                 });
             });
 
-            // Open a new page and check it
-            const page = await browser.newPage();
-            checkPage(browser, socket, page, stopRefreshing);
+            const newPage = await browser.newPage();
+            checkPage(browser, socket, newPage, stopRefreshing);
 
             socket.emit('OperationAgainResult', { browserId });
         }
@@ -125,15 +125,13 @@ io.on('connection', (socket) => {
                         setTimeout(() => {
                             const submit = document.getElementById("A55");
                             submit.click();
-
                             setTimeout(() => {
                                 const accept = document.getElementById("A138");
                                 accept.click();
                             }, 1000);
-
                         }, 1000);
                     }, 1000);
-                }, 2000);
+                }, 1000);
             }, data);
         }
     });
@@ -151,8 +149,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('deletDataFromFile', async (data) => {
-        const { NIN } = data;
-        await deletDataFromFile(NIN);
+        await deletDataFromFile(data);
         socket.emit('getDataInfoResult', await getDataInfo());
     });
 

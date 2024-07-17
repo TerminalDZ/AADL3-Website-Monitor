@@ -2,4 +2,7 @@ node_modules/
 user_data/
 public/screenshots
 info.txt
+data.json
+info.json
+info copy.txt
 .env

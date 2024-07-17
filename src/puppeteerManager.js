@@ -1,7 +1,6 @@
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
 const path = require('path');
-const axios = require('axios');
 const { sendTelegramMessage, takeScreenshot } = require('./utils');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -11,7 +10,6 @@ puppeteer.use(StealthPlugin());
 const extensionPath = path.resolve('./extension');
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const CHAT_ID = process.env.TELEGRAM_CHAT_ID;
-
 const url = process.env.URL;
 
 async function startBrowser(socket, browsers, stopRefreshing) {
@@ -93,6 +91,8 @@ async function takeAllScreenshots(browser, socket) {
         const screenshotPath = await takeScreenshot(pages[i], browser._browserId);
         if (screenshotPath) {
             socket.emit('screenshotTaken', { browserId: browser._browserId, screenshotPath });
+        } else {
+            console.error(`Failed to take screenshot for browser ${browser._browserId}`);
         }
     }
 }
