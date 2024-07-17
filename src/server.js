@@ -107,47 +107,44 @@ io.on('connection', (socket) => {
         if (browser) {
             const pages = await browser.pages();
             const lastPage = pages[pages.length - 1];
+            await lastPage.evaluate((data) => {
+                const orange_button = document.getElementById("A14");
+                if (orange_button) {
+                    orange_button.click();
+                    setTimeout(() => {
+                        
 
-            await lastPage.evaluate(async (data) => {
-                const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+                        const select_wilaya = document.getElementById("A17");
+                        const input_nin = document.getElementById("A22");
+                        const input_nss = document.getElementById("A27");
+                        const input_telephone = document.getElementById("A13");
+                        select_wilaya.value = parseInt(data.WIL) + 1;
+                        input_nin.value = data.NIN;
+                        input_nss.value = data.NSS;
+                        input_telephone.value = data.TEL;
+                        setTimeout(() => {
+                            const checkbox = document.getElementById("A91_1");
+                            if (checkbox) {
+                                checkbox.click();
+                                setTimeout(() => {
+                                    const submit = document.getElementById("A55");
+                                    if (submit) {
+                                        submit.click();
+                                        /*setTimeout(() => {
+                                            const accept = document.getElementById("A138");
+                                            if (accept) {
+                                                accept.click();
 
-                const clickButton = async (selector) => {
-                    const button = document.getElementById(selector);
-                    if (button) {
-                        button.click();
-                        await delay(1000); // wait for the page to load
-                    } else {
-                        throw new Error(`${selector} not found`);
-                    }
-                };
 
-                const fillField = (selector, value) => {
-                    const field = document.getElementById(selector);
-                    if (field) {
-                        field.value = value;
-                    } else {
-                        throw new Error(`${selector} not found`);
-                    }
-                };
-
-                try {
-                    await clickButton("A14");
-
-                    fillField("A17", parseInt(data.WIL) + 1);
-                    fillField("A22", data.NIN);
-                    fillField("A27", data.NSS);
-                    fillField("A13", data.TEL);
-
-                    await clickButton("A91_1");
-                    await clickButton("A55");
-                    await clickButton("A138");
-
-                    const success = document.body.innerHTML.includes("لقد تمت عملية الإكتتاب بنجاح");
-                    if (success) {
-                        console.log("Data has been added successfully");
-                    }
-                } catch (error) {
-                    console.error(error);
+                                            }
+                                        }, 1000);*/
+                                    }
+                                }, 1000);
+                            }
+                        }, 1000);
+                    }, 1000);
+                }else{
+                    console.log("Orange button not found");
                 }
             }, data);
         }

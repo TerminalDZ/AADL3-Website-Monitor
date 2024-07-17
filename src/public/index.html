@@ -184,17 +184,18 @@
         audio.play();
 
         Swal.fire({
-          title: 'Browser ' + browserId + ' stopped refreshing',
-          text: 'Do you want to stop the audio?',
-          icon: 'warning',
-          showCancelButton: true,
-          confirmButtonText: 'Yes',
-          cancelButtonText: 'No'
+            title: 'Browser ' + browserId + ' stopped refreshing',
+            text: 'Do you want to stop the audio?',
+            icon: 'warning',
+            showCancelButton: false,
+            confirmButtonText: 'Yes',
+            allowOutsideClick: false
         }).then((result) => {
-          if (result.isConfirmed) {
-            audio.pause();
-          }
+            if (result.isConfirmed) {
+                audio.pause();
+            }
         });
+
 
 
       } else {
