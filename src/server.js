@@ -130,14 +130,14 @@ io.on('connection', (socket) => {
                                     const submit = document.getElementById("A55");
                                     if (submit) {
                                         submit.click();
-                                        /*setTimeout(() => {
+                                        setTimeout(() => {
                                             const accept = document.getElementById("A138");
                                             if (accept) {
                                                 accept.click();
 
 
                                             }
-                                        }, 1000);*/
+                                        }, 1000);
                                     }
                                 }, 1000);
                             }
