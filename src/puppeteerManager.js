@@ -73,8 +73,7 @@ async function checkPage(browser, socket, page, stopRefreshing) {
             }
         }
     } catch (error) {
-      //  console.error('Error checking page:', error);
-        console.error('Error checking page');
+        console.error('Error checking page:', error.message);
         socket.emit('browserMessage', { browserId: browser._browserId, message: `Error: ${error.message}`, type: 'danger' });
 
         const screenshotPath = await takeScreenshot(page, browser._browserId);
@@ -103,5 +102,5 @@ module.exports = {
     stopBrowser,
     checkPage,
     takeAllScreenshots,
-    takeScreenshot 
+    takeScreenshot
 };

@@ -3,7 +3,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 const path = require('path');
 const dotenv = require('dotenv');
-const { startBrowser, stopBrowser, takeAllScreenshots, checkPage, takeScreenshot  } = require('./puppeteerManager');
+const { startBrowser, stopBrowser, takeAllScreenshots, checkPage, takeScreenshot } = require('./puppeteerManager');
 const { getDataInfo, addDataToFile, deletDataFromFile } = require('./fileManager');
 
 dotenv.config();
@@ -34,9 +34,6 @@ io.on('connection', (socket) => {
         browsers.length = 0;
         socket.emit('allBrowsersStopped');
     });
- 
-
-
 
     socket.on('stopBrowser', async (browserId) => {
         await stopBrowser(browserId, browsers);
@@ -57,8 +54,22 @@ io.on('connection', (socket) => {
     socket.on('OperationAgain', async (browserId) => {
         const browser = browsers.find(b => b._browserId === browserId);
         if (browser) {
+            // Delete all cookies, local storage, and session storage data
+            const pages = await browser.pages();
+            const lastPage = pages[pages.length - 1];
+            await lastPage.evaluate(() => {
+                window.localStorage.clear();
+                window.sessionStorage.clear();
+                document.cookie.split(";").forEach(function (c) {
+                    document.cookie = c
+                        .replace(/^ +/, "")
+                        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+                });
+            });
+
+            // Open a new page and check it
             const page = await browser.newPage();
-            checkPage(browser, socket, page);
+            checkPage(browser, socket, page, stopRefreshing);
 
             socket.emit('OperationAgainResult', { browserId });
         }
@@ -90,36 +101,42 @@ io.on('connection', (socket) => {
         const data = await getDataInfo();
         socket.emit('dataSelected', data[index]);
     });
-    
-    
 
     socket.on('AutoFill', async (browserId, data) => {
-      const browser = browsers.find(b => b._browserId === browserId);
-      if (browser) {
-          const pages = await browser.pages();
-          const lastPage = pages[pages.length - 1];
-          await lastPage.evaluate((data) => {
-              const orange_button = document.getElementById("A14");
-              orange_button.click();  
-              setTimeout(() => {
-                  const select_wilaya = document.getElementById("A17");
-                  const input_nin = document.getElementById("A22");
-                  const input_nss = document.getElementById("A27");
-                  const input_telephone = document.getElementById("A13");
-                  //select_wilaya.value = parseInt(data.WIL) + 1;
-                  select_wilaya.value = data.WIL;
-                  input_nin.value = data.NIN;
-                  input_nss.value = data.NSS;
-                  input_telephone.value = data.TEL;
-                  document.querySelector('#submit').click();
+        const browser = browsers.find(b => b._browserId === browserId);
+        if (browser) {
+            const pages = await browser.pages();
+            const lastPage = pages[pages.length - 1];
+            await lastPage.evaluate((data) => {
+                const orange_button = document.getElementById("A14");
+                orange_button.click();
+                setTimeout(() => {
+                    const select_wilaya = document.getElementById("A17");
+                    const input_nin = document.getElementById("A22");
+                    const input_nss = document.getElementById("A27");
+                    const input_telephone = document.getElementById("A13");
+                    select_wilaya.value = parseInt(data.WIL) + 1;
+                    input_nin.value = data.NIN;
+                    input_nss.value = data.NSS;
+                    input_telephone.value = data.TEL;
+                    setTimeout(() => {
+                        const checkbox = document.getElementById("A91_1");
+                        checkbox.click();
+                        setTimeout(() => {
+                            const submit = document.getElementById("A55");
+                            submit.click();
 
+                            setTimeout(() => {
+                                const accept = document.getElementById("A138");
+                                accept.click();
+                            }, 1000);
 
-                    
-              }, 1000);
-          }, data);
-      }
-  });
-  
+                        }, 1000);
+                    }, 1000);
+                }, 2000);
+            }, data);
+        }
+    });
 
     socket.on('addDataToFile', async (data) => {
         const { NOM, WIL, NIN, NSS, TEL } = data;
