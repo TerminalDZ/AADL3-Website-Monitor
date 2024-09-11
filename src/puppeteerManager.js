@@ -1,7 +1,7 @@
 const puppeteer = require("puppeteer-extra");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 const path = require("path");
-const { sendTelegramMessage, takeScreenshot } = require("./utils");
+const { sendTelegramMessage } = require("./utils");
 const dotenv = require("dotenv");
 dotenv.config();
 
@@ -67,14 +67,6 @@ async function checkPage(browser, socket, page, stopRefreshing) {
         message,
         type: "success",
       });
-
-      const screenshotPath = await takeScreenshot(page, browser._browserId);
-      if (screenshotPath) {
-        socket.emit("screenshotTaken", {
-          browserId: browser._browserId,
-          screenshotPath,
-        });
-      }
     } else {
       const refreshMessage = `Browser ${browser._browserId} - Status: ${status} - Refreshing`;
       console.log(refreshMessage);
@@ -83,14 +75,6 @@ async function checkPage(browser, socket, page, stopRefreshing) {
         message: refreshMessage,
         type: "warning",
       });
-
-      const screenshotPath = await takeScreenshot(page, browser._browserId);
-      if (screenshotPath) {
-        socket.emit("screenshotTaken", {
-          browserId: browser._browserId,
-          screenshotPath,
-        });
-      }
 
       if (!stopRefreshing) {
         setTimeout(
@@ -107,33 +91,8 @@ async function checkPage(browser, socket, page, stopRefreshing) {
       type: "danger",
     });
 
-    const screenshotPath = await takeScreenshot(page, browser._browserId);
-    if (screenshotPath) {
-      socket.emit("screenshotTaken", {
-        browserId: browser._browserId,
-        screenshotPath,
-      });
-    }
-
     if (!stopRefreshing) {
       setTimeout(() => checkPage(browser, socket, page, stopRefreshing), 5000);
-    }
-  }
-}
-
-async function takeAllScreenshots(browser, socket) {
-  const pages = await browser.pages();
-  for (let i = 1; i < pages.length; i++) {
-    const screenshotPath = await takeScreenshot(pages[i], browser._browserId);
-    if (screenshotPath) {
-      socket.emit("screenshotTaken", {
-        browserId: browser._browserId,
-        screenshotPath,
-      });
-    } else {
-      console.error(
-        `Failed to take screenshot for browser ${browser._browserId}`
-      );
     }
   }
 }
@@ -142,6 +101,4 @@ module.exports = {
   startBrowser,
   stopBrowser,
   checkPage,
-  takeAllScreenshots,
-  takeScreenshot,
 };

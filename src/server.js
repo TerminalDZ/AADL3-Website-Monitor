@@ -3,13 +3,7 @@ const http = require("http");
 const socketIo = require("socket.io");
 const path = require("path");
 const dotenv = require("dotenv");
-const {
-  startBrowser,
-  stopBrowser,
-  takeAllScreenshots,
-  checkPage,
-  takeScreenshot,
-} = require("./puppeteerManager");
+const { startBrowser, stopBrowser, checkPage } = require("./puppeteerManager");
 const {
   getDataInfo,
   addDataToFile,
@@ -98,27 +92,6 @@ io.on("connection", (socket) => {
     }
   });
 
-  socket.on("takeScreenshot", async (browserId) => {
-    try {
-      const browser = browsers.find((b) => b._browserId === browserId);
-      if (browser) {
-        const pages = await browser.pages();
-        const lastPage = pages[pages.length - 1];
-        const screenshotPath = await takeScreenshot(lastPage, browserId);
-        if (screenshotPath) {
-          socket.emit("screenshotTaken", { browserId, screenshotPath });
-          console.log(
-            `Screenshot taken for browser ${browserId} - ${screenshotPath}`
-          );
-        } else {
-          console.error(`Failed to take screenshot for browser ${browserId}`);
-        }
-      }
-    } catch (error) {
-      console.error("Error taking screenshot:", error);
-    }
-  });
-
   socket.on("OperationAgain", async (browserId) => {
     try {
       const browser = browsers.find((b) => b._browserId === browserId);
@@ -145,16 +118,6 @@ io.on("connection", (socket) => {
       }
     } catch (error) {
       console.error("Error in OperationAgain:", error);
-    }
-  });
-
-  socket.on("takeAllScreenshots", async () => {
-    for (const browser of browsers) {
-      try {
-        await takeAllScreenshots(browser, socket);
-      } catch (error) {
-        console.error("Error taking all screenshots:", error);
-      }
     }
   });
 

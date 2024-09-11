@@ -45,9 +45,7 @@
         <button id="stopAll" class="btn btn-danger me-2">
           Stop All Browsers
         </button>
-        <button id="takeAllScreenshots" class="btn btn-secondary me-2">
-          Take All Screenshot
-        </button>
+
         <button
           id="dataCards"
           class="btn btn-primary"
@@ -286,7 +284,6 @@
             <h5 class="card-title">Browser ${browserId}</h5>
             <p class="card-text" id="messages-${browserId}"></p>
             <button class="btn btn-danger mt-3" onclick="stopBrowser(${browserId})">Stop</button>
-            <button class="btn btn-secondary mt-3" onclick="takeScreenshot(${browserId})">Screenshot</button>
             <button class="btn btn-primary mt-3" onclick="OperationAgain(${browserId})">Reload</button>
             <button class="btn btn-primary mt-3" id="autoFill-${browserId}" style="display: none;" onclick="AutoFill(${browserId})">Auto Fill</button>
           </div>
@@ -337,12 +334,6 @@
         const img = document.querySelector(`#screenshot-${browserId}`);
         img.src = `${screenshotPath}?timestamp=${new Date().getTime()}`;
       });
-
-      document
-        .getElementById("takeAllScreenshots")
-        .addEventListener("click", () => {
-          socket.emit("takeAllScreenshots");
-        });
 
       document.getElementById("dataCards").addEventListener("click", () => {
         socket.emit("getDataInfo");
@@ -425,10 +416,6 @@
 
       function stopBrowser(browserId) {
         socket.emit("stopBrowser", browserId);
-      }
-
-      function takeScreenshot(browserId) {
-        socket.emit("takeScreenshot", browserId);
       }
 
       function OperationAgain(browserId) {
